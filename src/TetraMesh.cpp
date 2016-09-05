@@ -72,7 +72,7 @@ TetraTopologyRef TetraMesh::generateTetrasFromSurface( const TriangleTopologyRef
     const auto& tris = triMesh->GetTriangles();
     const auto& verts = triMesh->GetVertices();
     
-    CGALTetrahedralizeRef cth = std::make_shared<CGALTetrahedralize::CGALTetrahedralize>();
+    CGALTetrahedralizeRef cth = std::make_shared<CGALTetrahedralize>();
     
     try {
         cth->GenerateFromSurface( tris, verts, cellSize, facetAngle, facetSize, facetDistance, cellRadiusEdgeRatio );

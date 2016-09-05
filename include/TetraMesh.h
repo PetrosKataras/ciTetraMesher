@@ -31,7 +31,7 @@ using namespace ci;
 
 using TetraTopologyRef = std::shared_ptr<TetraTools::TetrahedronTopology>;
 using TriangleTopologyRef = std::shared_ptr<TetraTools::TriangleTopology>;
-using CGALTetrahedralizeRef = std::shared_ptr<CGALTetrahedralize::CGALTetrahedralize>;
+using CGALTetrahedralizeRef = std::shared_ptr<CGALTetrahedralize>;
 using TetraBatchRefVec = std::vector<gl::BatchRef>;
 using TetraMeshRef = std::shared_ptr<class TetraMesh>;
 
