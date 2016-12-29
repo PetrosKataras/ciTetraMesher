@@ -9,6 +9,7 @@
 #define TetraMesh_hpp
 
 #include "cinder/Cinder.h"
+#include "cinder/TriMesh.h"
 
 #include "TetrahedronTopology.h"
 #include "TriMeshLoader.h"
@@ -43,8 +44,8 @@ class TetraMesh {
                     const double facetDistance,
                     const double cellRadiusEdgeRatio );
     
-        void update();
         const TetraTopologyRef& getTopology() const { return mTopology; }
+		const ci::TriMeshRef& getTriMesh() const { return mTriMesh; }
     private:
         TriangleTopologyRef loadSurface( const std::string &filename );
     
@@ -54,11 +55,13 @@ class TetraMesh {
                                                     const double facetSize,
                                                     const double facetDistance,
                                                     const double cellRadiusEdgeRatio );
-        TetraTopologyRef mTopology;
+	private:
+        TetraTopologyRef	mTopology;
         TriangleTopologyRef mSurface;
-        std::vector<vec3> mVertices;
-        std::vector<vec3> mNormals;
-        std::vector<vec3> mCentroids;
+		ci::TriMeshRef		mTriMesh;
+        std::vector<vec3> 	mVertices;
+        std::vector<vec3> 	mNormals;
+        std::vector<vec3> 	mCentroids;
 };
 
 } // namespace Tetra

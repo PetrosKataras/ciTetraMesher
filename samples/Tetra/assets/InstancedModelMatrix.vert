@@ -32,14 +32,12 @@ out VertexData {
 vec4 ClipPlane = vec4( cutPlane, distance );
 void main() {
     gl_Position = ciViewProjection * aModelMatrix * ciPosition;
-    //gl_Position = ciModelViewProjection * ciPosition;
 
     Color = ciColor;
     Normal = ciNormalMatrix * ciNormal;
 
     vVertexOut.position = ciViewProjection * aModelMatrix * ciPosition;
     vVertexOut.normal = ciNormalMatrix * ciNormal;
-    //vVertexOut.color = ciColor;
     vVertexOut.color = vec4( 1, 0, 0, 1 );
 
     isVisible=1;
@@ -48,7 +46,4 @@ void main() {
     if( distSquared > ( boundingSphere.w * boundingSphere.w ) ) {
         isVisible = 0;
     }
-    //if( dot(ciModelMatrix * vec4(centroidPosition,1), ClipPlane ) < 0.0f) {
-    //    isVisible=0;
-    //}
 }

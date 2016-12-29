@@ -17,60 +17,59 @@ using ParamGroup = std::vector<params::InterfaceGl::OptionsBase>;
 
 class TetraApp : public App {
   public:
-	void setup() override;
-	void mouseDown( MouseEvent event ) override;
-	void mouseDrag( MouseEvent event ) override;
-	void update() override;
+    void setup() override;
+    void mouseDown( MouseEvent event ) override;
+    void mouseDrag( MouseEvent event ) override;
+    void update() override;
     void resize() override;
-	void draw() override;
+    void draw() override;
     void keyDown( KeyEvent event ) override;
 
   private:
     void createParams();
     void updateCutPlane();
-    void updateBoundingSphere();	
+    void updateBoundingSphere();    
     void generateTetraBatch( const TetraTopologyRef& tetraTopology );
-	struct DrawArraysIndirectCommand{                                                     
-		GLuint vertexCount;                                                               
-		GLuint instanceCount;                                                             
-		GLuint firstVertex;                                                               
-		GLuint baseInstance;                                                              
-	};            
+    struct DrawArraysIndirectCommand{                                                     
+        GLuint vertexCount;                                                               
+        GLuint instanceCount;                                                             
+        GLuint firstVertex;                                                               
+        GLuint baseInstance;                                                              
+    };            
   private:
-    CameraPersp		mCamera;
-    CameraUi		mCamUi;
-    TetraMeshRef mMesh;
-    gl::GlslProgRef mPhongShader;
+    params::InterfaceGlRef      mParams;
+    CameraPersp                 mCamera;
+    CameraUi                    mCamUi;
+    TetraMeshRef                mMesh;
 
-    gl::BatchRef mCutPlane;
-    gl::BatchRef mBoundingSphere;
-    params::InterfaceGlRef mParams;
-    mat4 mCutPlaneTransform;
-    float mCutPlaneX, mCutPlaneY, mCutPlaneZ = 0.0f;
-    float mCutPlaneDistance = 0.0f;
-    bool mDrawCutPlane = false;
-    float mBSphereRadius = 10.0f;
-    float mBSphereCenterX = 0.0f;
-    float mBSphereCenterY = 0.0f;
-    float mBSphereCenterZ = 0.0f;
-    float mLightX = 0.0f;
-    float mLightY = 0.0f;
-    float mLightZ = 0.0f;
-    bool mDrawBSphere = true;
-    gl::BatchRef    mTetraMdiBatch;
-    gl::GlslProgRef mTetraMdiGlsl;
-	std::vector<vec3> mVertices;
-	std::vector<vec3> mNormals;
-	std::vector<vec3> mCentroids;
-	std::vector<mat4> mModelMatrices;
-	gl::VboRef mIndirectBuffer;
-	gl::VboRef mModelMatricesVbo;
+    gl::BatchRef                mCutPlane;
+    gl::BatchRef                mBoundingSphere;
+    mat4                        mCutPlaneTransform;
+    float                       mCutPlaneX, mCutPlaneY, mCutPlaneZ = 0.0f;
+    float                       mCutPlaneDistance = 0.0f;
+    bool                        mDrawCutPlane = false;
+    float                       mBSphereRadius = 10.0f;
+    float                       mBSphereCenterX = 0.0f;
+    float                       mBSphereCenterY = 0.0f;
+    float                       mBSphereCenterZ = 0.0f;
+    float                       mLightX = 0.0f;
+    float                       mLightY = 0.0f;
+    float                       mLightZ = 0.0f;
+    bool                        mDrawBSphere = true;
+    gl::BatchRef                mTetraMdiBatch;
+    gl::GlslProgRef             mTetraMdiGlsl;
+    std::vector<vec3>           mVertices;
+    std::vector<vec3>           mNormals;
+    std::vector<vec3>           mCentroids;
+    std::vector<mat4>           mModelMatrices;
+    gl::VboRef                  mIndirectBuffer;
+    gl::VboRef                  mModelMatricesVbo;
 
 };
 
 void TetraApp::generateTetraBatch( const TetraTopologyRef& tetraTopology )
 {
-	if( !tetraTopology ) return;
+    if( !tetraTopology ) return;
 
     mVertices.clear();
     mNormals.clear();
@@ -95,7 +94,7 @@ void TetraApp::generateTetraBatch( const TetraTopologyRef& tetraTopology )
         vec3 v2 = vec3( verts[tetra.index[2]].x, verts[tetra.index[2]].y, verts[tetra.index[2]].z );
         vec3 v3 = vec3( verts[tetra.index[3]].x, verts[tetra.index[3]].y, verts[tetra.index[3]].z );
 
-		vec3 vc0 = ( v0 - centroid );// * .90f;
+        vec3 vc0 = ( v0 - centroid );// * .90f;
         vec3 vc1 = ( v1 - centroid );// * .90f;
         vec3 vc2 = ( v2 - centroid );// * .90f;
         vec3 vc3 = ( v3 - centroid );// * .90f;
@@ -123,14 +122,15 @@ void TetraApp::generateTetraBatch( const TetraTopologyRef& tetraTopology )
             gl::VboMesh::Layout().usage( GL_STATIC_DRAW ).attrib( geom::Attrib::NORMAL, 3 )
         };
 
-    	for( const auto& vertex : vertices ) {
+        for( const auto& vertex : vertices ) {
             mVertices.push_back( vertex );
         }
         for( const auto& norm : normals ) {
             mNormals.push_back( norm );
         }
     }
-	 auto centroidsVbo = gl::Vbo::create( GL_ARRAY_BUFFER, mCentroids.size() * sizeof( vec3 ), mCentroids.data(), GL_STATIC_DRAW );
+
+    auto centroidsVbo = gl::Vbo::create( GL_ARRAY_BUFFER, mCentroids.size() * sizeof( vec3 ), mCentroids.data(), GL_STATIC_DRAW );
     geom::BufferLayout instanceCentroidsLayout;
     instanceCentroidsLayout.append( geom::Attrib::CUSTOM_0, 3, 0, 0, 1 );
 
@@ -144,7 +144,7 @@ void TetraApp::generateTetraBatch( const TetraTopologyRef& tetraTopology )
     mIndirectBuffer = gl::Vbo::create( GL_DRAW_INDIRECT_BUFFER );
     mIndirectBuffer->bufferData( tetrahedra.size() * sizeof( DrawArraysIndirectCommand ), NULL, GL_STATIC_DRAW );
     DrawArraysIndirectCommand * drawCmd = ( DrawArraysIndirectCommand* )mIndirectBuffer->mapBufferRange( 0, tetrahedra.size() * sizeof( DrawArraysIndirectCommand ),         GL_MAP_WRITE_BIT | GL_MAP_INVALIDATE_BUFFER_BIT );
-	CI_CHECK_GL();
+    CI_CHECK_GL();
     for( auto i = 0; i < tetrahedra.size(); ++i ) {
         drawCmd[i].vertexCount = 12;
         drawCmd[i].instanceCount = 1;
@@ -163,9 +163,8 @@ void TetraApp::generateTetraBatch( const TetraTopologyRef& tetraTopology )
         
     indirectVboMesh->appendVbo( instanceCentroidsLayout, centroidsVbo );
     indirectVboMesh->appendVbo( instanceModelMatricesLayout, mModelMatricesVbo );
- 	mTetraMdiGlsl = gl::GlslProg::create( gl::GlslProg::Format().vertex( loadAsset( "InstancedModelMatrix.vert" )).geometry( loadAsset("InstancedModelMatrix.geom") ).fragment(   loadAsset( "InstancedModelMatrix.frag" ) ) );
+    mTetraMdiGlsl = gl::GlslProg::create( gl::GlslProg::Format().vertex( loadAsset( "InstancedModelMatrix.vert" )).geometry( loadAsset("InstancedModelMatrix.geom") ).fragment(   loadAsset( "InstancedModelMatrix.frag" ) ) );
     mTetraMdiBatch = gl::Batch::create( indirectVboMesh, mTetraMdiGlsl, { { geom::Attrib::CUSTOM_0, "centroidPosition" }, { geom::Attrib::CUSTOM_1, "aModelMatrix" } } );
-
 }
 
 void TetraApp::resize()
@@ -209,26 +208,22 @@ void TetraApp::updateBoundingSphere()
 
 void TetraApp::keyDown( KeyEvent event )
 {
-	if ( event.getCode() == KeyEvent::KEY_ESCAPE ) quit();
+    if ( event.getCode() == KeyEvent::KEY_ESCAPE ) quit();
 }
 
 
 void TetraApp::setup()
 {
-
-    mCamera.lookAt( vec3( .0f, 0.0f, 10.0f ), vec3( 0 ) );
-	mCamera.setPerspective( 60.0f, getWindowAspectRatio(), 1.0f, 250.0f );
-    mCamUi = CameraUi( &mCamera );
-
     updateCutPlane();
 
     // cellSize, facetAngle, facetSize, facetDistance, cellEdgeRatio
     mMesh = TetraMesh::create( getAssetPath("8lbs.off"), 10.0, 20, 1.4, 0.8, 3 );
-	generateTetraBatch( mMesh->getTopology() );
+    generateTetraBatch( mMesh->getTopology() );
+    auto boundingSphere = Sphere::calculateBoundingSphere( mMesh->getTriMesh()->getPositions<3>(), mMesh->getTriMesh()->getNumVertices() );
+    mCamera = mCamera.calcFraming( boundingSphere );
+    mCamUi = CameraUi( &mCamera );
 
     createParams();
-
-    mPhongShader = gl::GlslProg::create( loadAsset( "phong.vert" ), loadAsset( "phong.frag" ) );
 
     gl::enableDepthRead();
     gl::enableDepthWrite();
@@ -259,15 +254,11 @@ void TetraApp::update()
 
 void TetraApp::draw()
 {
-	gl::clear( Color( .5, .5, .5 ) );
+    gl::clear( Color( .5, .5, .5 ) );
     gl::setMatrices( mCamera );
     if( mMesh ) {
         gl::ScopedColor colorScope( Color( CM_RGB, 1.0f, 1.0f, 1.0f ) );
-        //mMesh->draw();
-        //const auto& glsl = mMesh->getMDIGlsl();
         gl::ScopedGlslProg glslProg( mTetraMdiGlsl );
-        //glsl->uniform( "distance", mCutPlaneDistance );
-        //glsl->uniform( "cutPlane", vec3( mCutPlaneX, mCutPlaneY, mCutPlaneZ ) );
         mTetraMdiGlsl->uniform("boundingSphere", vec4( mBSphereCenterX, mBSphereCenterY, mBSphereCenterZ, mBSphereRadius ) );
         mTetraMdiGlsl->uniform("lightPos", vec3( mLightX, mLightY, mLightZ ) );
         auto vao = mTetraMdiBatch->getVao();

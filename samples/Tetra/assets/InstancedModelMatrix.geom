@@ -26,7 +26,6 @@ vec3 GetNormal()
    return normalize(cross(a, b));
 }  
 
-vec4 plane = vec4(0, 1, 0, 7);
 void main()
 {
     gNormal = Normal[0];

@@ -12,6 +12,7 @@
 
 namespace tetra {
 
+using namespace ci;
 using namespace ci::app;
 
 TetraMesh::TetraMesh( const fs::path& path,
@@ -37,7 +38,14 @@ TriangleTopologyRef TetraMesh::loadSurface(const std::string& filename )
     mSurface = std::make_shared<TetraTools::TriangleTopology>();
     mSurface->Init( loader.GetVertices(), loader.GetTriangles() );
     mSurface->GenerateNormals();
-    
+   
+	mTriMesh = TriMesh::create();
+	for( const auto& vertex : loader.GetVertices() ) {
+		mTriMesh->appendPosition( ci::vec3( vertex.x, vertex.y, vertex.z ) );
+	}
+	for( const auto& triangle : loader.GetTriangles() ) {
+		mTriMesh->appendTriangle( triangle.index[0], triangle.index[1], triangle.index[2] );
+	}
     
     timer.stop();
     CI_LOG_I("Finished loading Surface Mesh for : " << filename << " in " << timer.getSeconds() << " seconds " );
@@ -73,11 +81,6 @@ TetraTopologyRef TetraMesh::generateTetrasFromSurface( const TriangleTopologyRef
     mTopology->Init( cth->GetTetraVertices(), cth->GetTetras(), false );
     CI_LOG_I( "Generated tetrahedral mesh in : " << timer.getSeconds() << " with " << cth->GetTetras().size() << " tetras and " << cth->GetTetraVertices().size() << " vertices " );
     return mTopology;
-}
-
-void TetraMesh::update()
-{
-
 }
 
 } // namespace tetra
