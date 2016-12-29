@@ -52,9 +52,6 @@ class TetraApp : public App {
     float                       mBSphereCenterX = 0.0f;
     float                       mBSphereCenterY = 0.0f;
     float                       mBSphereCenterZ = 0.0f;
-    float                       mLightX = 0.0f;
-    float                       mLightY = 0.0f;
-    float                       mLightZ = 0.0f;
     bool                        mDrawBSphere = true;
     gl::BatchRef                mTetraMdiBatch;
     gl::GlslProgRef             mTetraMdiGlsl;
@@ -69,7 +66,7 @@ class TetraApp : public App {
 
 void TetraApp::generateTetraBatch( const TetraTopologyRef& tetraTopology )
 {
-    if( !tetraTopology ) return;
+    if( ! tetraTopology ) return;
 
     mVertices.clear();
     mNormals.clear();
@@ -186,10 +183,6 @@ void TetraApp::createParams()
     mParams->addParam( "BSphereCenterY", &mBSphereCenterY ).step( 1.0f ).updateFn( std::bind( &TetraApp::updateBoundingSphere, this ) );
     mParams->addParam( "BSphereCenterZ", &mBSphereCenterZ ).step( 1.0f ).updateFn( std::bind( &TetraApp::updateBoundingSphere, this ) );
     mParams->addParam( "Draw Bounding Sphere", &mDrawBSphere );
-    mParams->addSeparator();
-    mParams->addParam( "LightX", &mLightX ).step( 1.0f ).updateFn( std::bind( &TetraApp::updateBoundingSphere, this ) );
-    mParams->addParam( "LightY", &mLightY ).step( 1.0f ).updateFn( std::bind( &TetraApp::updateBoundingSphere, this ) );
-    mParams->addParam( "LightZ", &mLightZ ).step( 1.0f ).updateFn( std::bind( &TetraApp::updateBoundingSphere, this ) );
 }
 
 void TetraApp::updateCutPlane()
@@ -260,7 +253,6 @@ void TetraApp::draw()
         gl::ScopedColor colorScope( Color( CM_RGB, 1.0f, 1.0f, 1.0f ) );
         gl::ScopedGlslProg glslProg( mTetraMdiGlsl );
         mTetraMdiGlsl->uniform("boundingSphere", vec4( mBSphereCenterX, mBSphereCenterY, mBSphereCenterZ, mBSphereRadius ) );
-        mTetraMdiGlsl->uniform("lightPos", vec3( mLightX, mLightY, mLightZ ) );
         auto vao = mTetraMdiBatch->getVao();
         gl::ScopedVao ScopedVao( vao );
         gl::setDefaultShaderVars();

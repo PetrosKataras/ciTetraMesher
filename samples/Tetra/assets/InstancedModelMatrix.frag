@@ -9,8 +9,6 @@ in VertexData	{
 	vec2 texCoord;
 } vVertexIn;
 
-uniform vec3 lightPos;
-
 in vec4 position;
 void main() {
 
@@ -19,7 +17,7 @@ void main() {
 	vec3 cSpecular = vec3( 0.3 );
 
 	// light properties in view space
-	vec3 vLightPosition = lightPos;
+	vec3 vLightPosition = vec3( 1.0, 1.0, 1.0 );
 
 	// lighting calculations
 	vec3 N = normalize( vVertexIn.normal );
