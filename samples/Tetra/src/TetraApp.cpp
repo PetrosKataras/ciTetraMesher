@@ -160,7 +160,8 @@ void TetraApp::generateTetraBatch( const TetraTopologyRef& tetraTopology )
         
     indirectVboMesh->appendVbo( instanceCentroidsLayout, centroidsVbo );
     indirectVboMesh->appendVbo( instanceModelMatricesLayout, mModelMatricesVbo );
-    mTetraMdiGlsl = gl::GlslProg::create( gl::GlslProg::Format().vertex( loadAsset( "InstancedModelMatrix.vert" )).geometry( loadAsset("InstancedModelMatrix.geom") ).fragment(   loadAsset( "InstancedModelMatrix.frag" ) ) );
+    mTetraMdiGlsl = gl::GlslProg::create( gl::GlslProg::Format().vertex( loadAsset( "tetra.vert" )).geometry(
+    loadAsset("tetra.geom") ).fragment(   loadAsset( "tetra.frag" ) ) );
     mTetraMdiBatch = gl::Batch::create( indirectVboMesh, mTetraMdiGlsl, { { geom::Attrib::CUSTOM_0, "centroidPosition" }, { geom::Attrib::CUSTOM_1, "aModelMatrix" } } );
 }
 
