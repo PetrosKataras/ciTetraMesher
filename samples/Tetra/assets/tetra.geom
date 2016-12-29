@@ -4,20 +4,20 @@ layout( triangles ) in;
 layout( triangle_strip ) out;
 layout( max_vertices = 3 ) out;
 
-in vec3 Normal[];
-in vec4 Color[];
-in int isVisible[];
-
-out vec3 gNormal;
-out vec4 gColor;
-out vec4 position;
+in VertexData {
+    vec4 position;
+    vec3 normal;
+    vec4 color;
+    vec2 texCoord;
+    int isVisible;
+}gVertexIn[];
 
 out VertexData {
 	vec4 position;
 	vec3 normal;
 	vec4 color;
 	vec2 texCoord;
-}vVertexOut;
+}gVertexOut;
 
 vec3 GetNormal()
 {
@@ -28,15 +28,12 @@ vec3 GetNormal()
 
 void main()
 {
-    gNormal = Normal[0];
-    gColor = Color[0];
-    vVertexOut.normal = GetNormal();
-    
+    gVertexOut.normal = GetNormal();
     for( int i = 0; i < 3; i++ ) {
-        if( isVisible[i] == 1 ) {
+        if( gVertexIn[i].isVisible == 1 ) {
             gl_Position = gl_in[i].gl_Position;
-            vVertexOut.position = gl_in[i].gl_Position;
-            vVertexOut.color = Color[i];
+            gVertexOut.position = gl_in[i].gl_Position;
+            gVertexOut.color = gVertexIn[i].color;
             EmitVertex();
         }
     }
