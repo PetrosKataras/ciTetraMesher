@@ -12,6 +12,9 @@ set( CINDER_VERBOSE ON )
 
 ci_make_app( 
 	SOURCES ${SAMPLE_DIR}/src/TetraApp.cpp
+            ${SAMPLE_DIR}/src/DeferredRenderer/DeferredRenderer.cpp
+            ${SAMPLE_DIR}/src/DeferredRenderer/Light.cpp
+    INCLUDES ${SAMPLE_DIR}/src/DeferredRenderer
 	CINDER_PATH ${CINDER_PATH}
 	BLOCKS ciTetraMesher
 )

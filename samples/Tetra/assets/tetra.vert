@@ -1,15 +1,15 @@
-#version 150
+#version 330
 precision highp float;
 
 in vec4 ciPosition;
 in vec4 ciColor;
 in vec3 ciNormal;
 
-in mat4 aModelMatrix;
 in vec3 centroidPosition;
 
 uniform mat4 ciViewProjection;
 uniform mat4 ciModelViewProjection;
+uniform mat4 ciModelView;
 uniform mat3 ciNormalMatrix;
 uniform mat4 ciModelMatrix;
 
@@ -25,13 +25,12 @@ out VertexData {
 } vVertexOut;
 
 void main() {
-    gl_Position = ciViewProjection * aModelMatrix * ciPosition;
-
-    vVertexOut.position = gl_Position;
+    gl_Position = ciModelViewProjection * ciPosition;
+    vVertexOut.position = ciModelView * ciPosition;
     vVertexOut.normal = ciNormalMatrix * ciNormal;
     vVertexOut.color = ciColor;
 
-    vec3 distFromSphereCenter = centroidPosition - vec3( boundingSphere.x, boundingSphere.y, boundingSphere.z );
+    vec3 distFromSphereCenter = centroidPosition - boundingSphere.xyz;
     float distSquared = dot( distFromSphereCenter, distFromSphereCenter );
     vVertexOut.isVisible = distSquared > ( boundingSphere.w * boundingSphere.w ) ? 0 : 1;
 }

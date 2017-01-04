@@ -6,6 +6,7 @@
 #include "cinder/params/Params.h"
 
 #include "TetraMesh.h"
+#include "DeferredRenderer.h"
 
 using namespace ci;
 using namespace ci::app;
@@ -27,6 +28,7 @@ class TetraApp : public App {
 
   private:
     void createParams();
+    void toggleDebug();
     void updateCutPlane();
     void updateBoundingSphere();    
     void generateTetraBatch( const TetraTopologyRef& tetraTopology );
@@ -41,6 +43,7 @@ class TetraApp : public App {
     CameraPersp                 mCamera;
     CameraUi                    mCamUi;
     TetraMeshRef                mMesh;
+    DeferredRendererRef         mDeferredRenderer;
 
     gl::BatchRef                mCutPlane;
     gl::BatchRef                mBoundingSphere;
@@ -62,6 +65,7 @@ class TetraApp : public App {
     std::vector<mat4>           mModelMatrices;
     gl::VboRef                  mIndirectBuffer;
     gl::VboRef                  mModelMatricesVbo;
+    bool                        mEnableDebug = true;
 };
 
 void TetraApp::generateTetraBatch( const TetraTopologyRef& tetraTopology )
@@ -160,8 +164,8 @@ void TetraApp::generateTetraBatch( const TetraTopologyRef& tetraTopology )
         
     indirectVboMesh->appendVbo( instanceCentroidsLayout, centroidsVbo );
     indirectVboMesh->appendVbo( instanceModelMatricesLayout, mModelMatricesVbo );
-    mTetraMdiGlsl = gl::GlslProg::create( gl::GlslProg::Format().vertex( loadAsset( "tetra.vert" )).geometry(
-    loadAsset("tetra.geom") ).fragment(   loadAsset( "tetra.frag" ) ) );
+    mTetraMdiGlsl = gl::GlslProg::create( gl::GlslProg::Format().vertex( loadAsset( "tetra.vert" ) ).geometry(
+    loadAsset("tetra.geom") ).fragment( loadAsset( "tetra.frag" ) ).define( "ENABLE_GBUFFER_PASS" ) );
     mTetraMdiBatch = gl::Batch::create( indirectVboMesh, mTetraMdiGlsl, { { geom::Attrib::CUSTOM_0, "centroidPosition" }, { geom::Attrib::CUSTOM_1, "aModelMatrix" } } );
 }
 
@@ -187,6 +191,14 @@ void TetraApp::createParams()
     mParams->addSeparator();
     mParams->addParam( "Tetra Scale", &mTetraScale ).step( .01f ).min( .0f).max(1.0f).updateFn( std::bind(
     &TetraApp::generateTetraBatch, this, mMesh->getTopology()  ) );
+    mParams->addSeparator();
+    mParams->addParam( "Toggle debug", &mEnableDebug ).updateFn( std::bind( &TetraApp::toggleDebug, this ) );
+}
+
+void TetraApp::toggleDebug()
+{
+    if( mDeferredRenderer )
+        mDeferredRenderer->enableDebugMode( mEnableDebug );
 }
 
 void TetraApp::updateCutPlane()
@@ -219,6 +231,8 @@ void TetraApp::setup()
     auto boundingSphere = Sphere::calculateBoundingSphere( mMesh->getTriMesh()->getPositions<3>(), mMesh->getTriMesh()->getNumVertices() );
     mCamera = mCamera.calcFraming( boundingSphere );
     mCamUi = CameraUi( &mCamera );
+    
+    mDeferredRenderer = DeferredRenderer::create();
 
     createParams();
 
@@ -244,39 +258,40 @@ void TetraApp::update()
     vec3 toVec = normalize( vec3( mCutPlaneX, mCutPlaneY, mCutPlaneZ ) ); 
     auto q = glm::quat( fromVec, toVec );
     auto m = glm::toMat4( q );
-    mCutPlaneTransform *= translate( vec3( 0, 0, mCutPlaneDistance ) );
+    mCutPlaneTransform *= glm::translate( vec3( 0, 0, mCutPlaneDistance ) );
     mCutPlaneTransform *= m;
-
+    
+    if( mDeferredRenderer )
+        mDeferredRenderer->update();
 }
 
 void TetraApp::draw()
 {
     gl::clear( Color( .5, .5, .5 ) );
-    gl::setMatrices( mCamera );
     if( mMesh ) {
-        gl::ScopedColor colorScope( Color( CM_RGB, 1.0f, 1.0f, 1.0f ) );
-        gl::ScopedGlslProg glslProg( mTetraMdiGlsl );
-        mTetraMdiGlsl->uniform("boundingSphere", vec4( mBSphereCenterX, mBSphereCenterY, mBSphereCenterZ, mBSphereRadius ) );
-        auto vao = mTetraMdiBatch->getVao();
-        gl::ScopedVao ScopedVao( vao );
-        gl::setDefaultShaderVars();
-        gl::ScopedBuffer scopedBuffer( mIndirectBuffer );
-        glMultiDrawArraysIndirect( GL_TRIANGLES, NULL, mMesh->getTopology()->GetTetrahedra().size(), 0 );
+        mTetraMdiBatch->getGlslProg()->uniform("boundingSphere", vec4( mBSphereCenterX, mBSphereCenterY, mBSphereCenterZ, mBSphereRadius ) );
+        if( mDeferredRenderer && mTetraMdiBatch && mIndirectBuffer )
+            mDeferredRenderer->render( mTetraMdiBatch, mIndirectBuffer, mMesh->getTopology()->GetTetrahedra().size(),
+            mCamera );
     }
-    if( mCutPlane && mDrawCutPlane ) {
-        gl::enableWireframe();
-        gl::ScopedColor colorScope( Color( CM_RGB, .0f, .0f, .0f ) );
-        gl::ScopedModelMatrix model;
-        gl::multModelMatrix( mCutPlaneTransform );
-        mCutPlane->draw();
-        gl::disableWireframe();
-    }
+    {
+        gl::ScopedMatrices scopedMatrices;
+        gl::setMatrices( mCamera );
+        if( mCutPlane && mDrawCutPlane ) {
+            gl::enableWireframe();
+            gl::ScopedColor colorScope( Color( CM_RGB, .0f, .0f, .0f ) );
+            gl::ScopedModelMatrix model;
+            gl::multModelMatrix( mCutPlaneTransform );
+            mCutPlane->draw();
+            gl::disableWireframe();
+        }
 
-    if( mBoundingSphere && mDrawBSphere ) {
-        gl::enableWireframe();
-        gl::ScopedColor colorScope( Color( CM_RGB, .0f, .0f, .0f ) );
-        mBoundingSphere->draw();
-        gl::disableWireframe();
+        if( mBoundingSphere && mDrawBSphere ) {
+            gl::enableWireframe();
+            gl::ScopedColor colorScope( Color( CM_RGB, .0f, .0f, .0f ) );
+            mBoundingSphere->draw();
+            gl::disableWireframe();
+        }
     }
 
     gl::drawCoordinateFrame(1);

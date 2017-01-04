@@ -19,21 +19,25 @@ out VertexData {
 	vec2 texCoord;
 }gVertexOut;
 
+out vec4 gPosition;
 vec3 GetNormal()
 {
-   vec3 a = vec3(gl_in[0].gl_Position) - vec3(gl_in[1].gl_Position);
-   vec3 b = vec3(gl_in[2].gl_Position) - vec3(gl_in[1].gl_Position);
-   return normalize(cross(a, b));
+   vec3 a = vec3( gl_in[0].gl_Position ) - vec3( gl_in[1].gl_Position );
+   vec3 b = vec3( gl_in[2].gl_Position ) - vec3( gl_in[1].gl_Position );
+   return normalize( cross( a, b ) );
 }  
 
 void main()
 {
-    gVertexOut.normal = GetNormal();
     for( int i = 0; i < 3; i++ ) {
         if( gVertexIn[i].isVisible == 1 ) {
-            gl_Position = gl_in[i].gl_Position;
+
+            gl_Position         = gl_in[i].gl_Position;
             gVertexOut.position = gl_in[i].gl_Position;
-            gVertexOut.color = gVertexIn[i].color;
+            gPosition           = gVertexIn[i].position; 
+            gVertexOut.color    = gVertexIn[i].color;
+            gVertexOut.normal   = gVertexIn[i].normal;
+
             EmitVertex();
         }
     }
