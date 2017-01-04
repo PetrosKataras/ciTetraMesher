@@ -43,18 +43,18 @@ class DeferredRenderer {
         gl::FboRef                  mFboPingPong;
         gl::FboRef                  mFboShadowMap;
         // Render textures
-	    ci::gl::Texture2dRef		mTextureFboAo[ 2 ];
-	    ci::gl::Texture2dRef		mTextureFboGBuffer[ 3 ];
-	    ci::gl::Texture2dRef		mTextureFboPingPong[ 2 ];
+        ci::gl::Texture2dRef        mTextureFboAo[ 2 ];
+        ci::gl::Texture2dRef        mTextureFboGBuffer[ 3 ];
+        ci::gl::Texture2dRef        mTextureFboPingPong[ 2 ];
         // Batches
-        ci::gl::BatchRef			mBatchDebugRect;
-        ci::gl::BatchRef			mBatchAoCompositeRect;
+        ci::gl::BatchRef            mBatchDebugRect;
+        ci::gl::BatchRef            mBatchAoCompositeRect;
         ci::gl::BatchRef            mBatchGBufferPlane;
         ci::gl::BatchRef            mBatchLBufferCube;
         ci::gl::BatchRef            mBatchGBufferSphere;
         ci::gl::BatchRef            mBatchFxaaRect;
         // Lights
-        std::vector<Light>			mLights;
+        std::vector<Light>          mLights;
         bool                        mDebugMode  = true;
         bool                        mDrawLights = false;
         bool                        mDrawFloor  = false;
