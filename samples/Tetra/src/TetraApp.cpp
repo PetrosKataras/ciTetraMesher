@@ -52,6 +52,7 @@ class TetraApp : public App {
     float                       mBSphereCenterX = 0.0f;
     float                       mBSphereCenterY = 0.0f;
     float                       mBSphereCenterZ = 0.0f;
+    float                       mTetraScale = 1.0f;
     bool                        mDrawBSphere = true;
     gl::BatchRef                mTetraMdiBatch;
     gl::GlslProgRef             mTetraMdiGlsl;
@@ -61,7 +62,6 @@ class TetraApp : public App {
     std::vector<mat4>           mModelMatrices;
     gl::VboRef                  mIndirectBuffer;
     gl::VboRef                  mModelMatricesVbo;
-
 };
 
 void TetraApp::generateTetraBatch( const TetraTopologyRef& tetraTopology )
@@ -74,7 +74,7 @@ void TetraApp::generateTetraBatch( const TetraTopologyRef& tetraTopology )
 
     const auto& tetrahedra = tetraTopology->GetTetrahedra();
     const auto& verts = tetraTopology->GetVertices();
-    
+
     for( const auto& tetra : tetrahedra ) { 
      
         std::vector<uint32_t> indices;
@@ -91,10 +91,10 @@ void TetraApp::generateTetraBatch( const TetraTopologyRef& tetraTopology )
         vec3 v2 = vec3( verts[tetra.index[2]].x, verts[tetra.index[2]].y, verts[tetra.index[2]].z );
         vec3 v3 = vec3( verts[tetra.index[3]].x, verts[tetra.index[3]].y, verts[tetra.index[3]].z );
 
-        vec3 vc0 = ( v0 - centroid );// * .90f;
-        vec3 vc1 = ( v1 - centroid );// * .90f;
-        vec3 vc2 = ( v2 - centroid );// * .90f;
-        vec3 vc3 = ( v3 - centroid );// * .90f;
+        vec3 vc0 = ( v0 - centroid ) * mTetraScale;
+        vec3 vc1 = ( v1 - centroid ) * mTetraScale;
+        vec3 vc2 = ( v2 - centroid ) * mTetraScale;
+        vec3 vc3 = ( v3 - centroid ) * mTetraScale;
 
         vertices.push_back( centroid + vc0 );
         vertices.push_back( centroid + vc3 );
@@ -184,6 +184,9 @@ void TetraApp::createParams()
     mParams->addParam( "BSphereCenterY", &mBSphereCenterY ).step( 1.0f ).updateFn( std::bind( &TetraApp::updateBoundingSphere, this ) );
     mParams->addParam( "BSphereCenterZ", &mBSphereCenterZ ).step( 1.0f ).updateFn( std::bind( &TetraApp::updateBoundingSphere, this ) );
     mParams->addParam( "Draw Bounding Sphere", &mDrawBSphere );
+    mParams->addSeparator();
+    mParams->addParam( "Tetra Scale", &mTetraScale ).step( .01f ).min( .0f).max(1.0f).updateFn( std::bind(
+    &TetraApp::generateTetraBatch, this, mMesh->getTopology()  ) );
 }
 
 void TetraApp::updateCutPlane()
@@ -257,6 +260,7 @@ void TetraApp::draw()
         auto vao = mTetraMdiBatch->getVao();
         gl::ScopedVao ScopedVao( vao );
         gl::setDefaultShaderVars();
+        gl::ScopedBuffer scopedBuffer( mIndirectBuffer );
         glMultiDrawArraysIndirect( GL_TRIANGLES, NULL, mMesh->getTopology()->GetTetrahedra().size(), 0 );
     }
     if( mCutPlane && mDrawCutPlane ) {
