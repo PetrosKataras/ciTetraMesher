@@ -15,6 +15,7 @@ uniform mat4 ciModelMatrix;
 
 uniform float distance;
 uniform vec4 boundingSphere;
+uniform float tetraScaleFactor = 1.0;
 
 out VertexData {
 	vec4 position;
@@ -25,7 +26,8 @@ out VertexData {
 } vVertexOut;
 
 void main() {
-    gl_Position = ciModelViewProjection * ciPosition;
+    vec3 scaledPos = ( ciPosition.xyz - centroidPosition ) * tetraScaleFactor;
+    gl_Position = ciModelViewProjection * ( vec4( centroidPosition, 1.0 ) + vec4( scaledPos, 1.0 ) );
     vVertexOut.position = ciModelView * ciPosition;
     vVertexOut.normal = ciNormalMatrix * ciNormal;
     vVertexOut.color = ciColor;

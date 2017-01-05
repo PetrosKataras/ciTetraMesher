@@ -31,6 +31,7 @@ class TetraApp : public App {
     void toggleDebug();
     void updateCutPlane();
     void updateBoundingSphere();    
+    void updateTetraScale();
     void generateTetraBatch( const TetraTopologyRef& tetraTopology );
     struct DrawArraysIndirectCommand{                                                     
         GLuint vertexCount;                                                               
@@ -50,12 +51,12 @@ class TetraApp : public App {
     mat4                        mCutPlaneTransform;
     float                       mCutPlaneX, mCutPlaneY, mCutPlaneZ = 0.0f;
     float                       mCutPlaneDistance = 0.0f;
+    float                       mTetraScaleFactor = 1.0f;
     bool                        mDrawCutPlane = false;
     float                       mBSphereRadius = 10.0f;
     float                       mBSphereCenterX = 0.0f;
     float                       mBSphereCenterY = 0.0f;
     float                       mBSphereCenterZ = 0.0f;
-    float                       mTetraScale = 1.0f;
     bool                        mDrawBSphere = true;
     gl::BatchRef                mTetraMdiBatch;
     gl::GlslProgRef             mTetraMdiGlsl;
@@ -95,26 +96,21 @@ void TetraApp::generateTetraBatch( const TetraTopologyRef& tetraTopology )
         vec3 v2 = vec3( verts[tetra.index[2]].x, verts[tetra.index[2]].y, verts[tetra.index[2]].z );
         vec3 v3 = vec3( verts[tetra.index[3]].x, verts[tetra.index[3]].y, verts[tetra.index[3]].z );
 
-        vec3 vc0 = ( v0 - centroid ) * mTetraScale;
-        vec3 vc1 = ( v1 - centroid ) * mTetraScale;
-        vec3 vc2 = ( v2 - centroid ) * mTetraScale;
-        vec3 vc3 = ( v3 - centroid ) * mTetraScale;
+        vertices.push_back( v0 );
+        vertices.push_back( v3 );
+        vertices.push_back( v2 );
 
-        vertices.push_back( centroid + vc0 );
-        vertices.push_back( centroid + vc3 );
-        vertices.push_back( centroid + vc2 );
+        vertices.push_back( v3 );
+        vertices.push_back( v1 );
+        vertices.push_back( v2 );
 
-        vertices.push_back( centroid + vc3 );
-        vertices.push_back( centroid + vc1 );
-        vertices.push_back( centroid + vc2 );
+        vertices.push_back( v1 );
+        vertices.push_back( v0 );
+        vertices.push_back( v2 );
 
-        vertices.push_back( centroid + vc1 );
-        vertices.push_back( centroid + vc0 );
-        vertices.push_back( centroid + vc2 );
-
-        vertices.push_back( centroid + vc0 );
-        vertices.push_back( centroid + vc1 );
-        vertices.push_back( centroid + vc3 );
+        vertices.push_back( v0 );
+        vertices.push_back( v1 );
+        vertices.push_back( v3 );
 
         CGALUtils::calculateAddTetraNormals( vertices, normals );
 
@@ -189,10 +185,17 @@ void TetraApp::createParams()
     mParams->addParam( "BSphereCenterZ", &mBSphereCenterZ ).step( 1.0f ).updateFn( std::bind( &TetraApp::updateBoundingSphere, this ) );
     mParams->addParam( "Draw Bounding Sphere", &mDrawBSphere );
     mParams->addSeparator();
-    mParams->addParam( "Tetra Scale", &mTetraScale ).step( .01f ).min( .0f).max(1.0f).updateFn( std::bind(
-    &TetraApp::generateTetraBatch, this, mMesh->getTopology()  ) );
+    mParams->addParam( "Tetra Scale", &mTetraScaleFactor ).step( .01f ).min( .0f).max(1.0f).updateFn( std::bind(
+    &TetraApp::updateTetraScale, this ) );
     mParams->addSeparator();
     mParams->addParam( "Toggle debug", &mEnableDebug ).updateFn( std::bind( &TetraApp::toggleDebug, this ) );
+}
+
+void TetraApp::updateTetraScale()
+{
+    if( ! mTetraMdiBatch ) return;
+
+    mTetraMdiBatch->getGlslProg()->uniform( "tetraScaleFactor", mTetraScaleFactor );
 }
 
 void TetraApp::toggleDebug()
