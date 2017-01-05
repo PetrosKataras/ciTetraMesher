@@ -2,6 +2,7 @@
 	precision highp float;
 	precision highp sampler2DShadow;
 #endif
+#include "./common/offset.glsl"
 
 uniform sampler2D		uSamplerAlbedo;
 uniform sampler2D		uSamplerNormalEmissive;
@@ -19,14 +20,13 @@ uniform bool	uShadowEnabled;
 uniform mat4 	uShadowMatrix;
 
 uniform mat4 	uViewMatrixInverse;
-uniform vec2	uWindowSize;
 
 in vec2     uv;
 out vec4 	oColor;
 
 void main( void )
 {
-	vec2 uv					= gl_FragCoord.xy / uWindowSize;
+	vec2 uv					= calcTexCoordFromFrag( gl_FragCoord.xy );
 	vec4 position			= texture( uSamplerPosition, uv );
 	
 	// Do not draw background

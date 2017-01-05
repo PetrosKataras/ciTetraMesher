@@ -42,6 +42,7 @@ class DeferredRenderer {
         gl::FboRef                  mFboLBuffer;
         gl::FboRef                  mFboPingPong;
         gl::FboRef                  mFboShadowMap;
+        gl::FboRef                  mFboCsz;
         // Render textures
         ci::gl::Texture2dRef        mTextureFboAo[ 2 ];
         ci::gl::Texture2dRef        mTextureFboGBuffer[ 3 ];
@@ -49,6 +50,9 @@ class DeferredRenderer {
         // Batches
         ci::gl::BatchRef            mBatchDebugRect;
         ci::gl::BatchRef            mBatchAoCompositeRect;
+        ci::gl::BatchRef            mBatchSaoBlurRect;
+        ci::gl::BatchRef            mBatchSaoCszRect;
+        ci::gl::BatchRef			mBatchSaoAoRect;
         ci::gl::BatchRef            mBatchGBufferPlane;
         ci::gl::BatchRef            mBatchLBufferCube;
         ci::gl::BatchRef            mBatchGBufferSphere;
@@ -58,5 +62,7 @@ class DeferredRenderer {
         bool                        mDebugMode  = true;
         bool                        mDrawLights = false;
         bool                        mDrawFloor  = false;
+        bool                        mDrawAo     = false;
+        vec2                        mOffset = vec2( 0 );
 };
 } // namespace tetra

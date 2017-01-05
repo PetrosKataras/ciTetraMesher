@@ -7,10 +7,12 @@ const int MODE_ALBEDO	= 0;
 const int MODE_NORMAL	= 1;
 const int MODE_POSITION	= 2;
 const int MODE_EMISSIVE	= 3;
+const int MODE_AO       = 4;
 
 uniform sampler2D uSamplerAlbedo;
 uniform sampler2D uSamplerNormalEmissive;
 uniform sampler2D uSamplerPosition;
+uniform sampler2D uSamplerAo;
 
 uniform int uMode;
 
@@ -33,6 +35,9 @@ void main( void )
 	case MODE_EMISSIVE:
 		color = vec4( vec3( texture( uSamplerNormalEmissive, uv ).a ), 1.0 );
 		break;
+    case MODE_AO:
+        color = vec4( texture( uSamplerAo, uv ).rrr, 1.0 );
+        break;
 	}
 	oColor = color;
 }
