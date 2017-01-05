@@ -10,13 +10,13 @@ DeferredRenderer::DeferredRenderer()
 {
     gl::disableAlphaBlending();
     // Set up lights
-    mLights.push_back( Light().colorDiffuse( ColorAf( 0.95f, 1.0f, 0.92f, 1.0f ) )
-                      .intensity( 0.8f ).position( vec3( 0.0f, 0.0f, 0.0f ) )
-                      .radius( 8.1f ).volume( 75.0f ) );
+    mLights.push_back( Light().colorDiffuse( ColorAf( 0.35f, .2f, 0.22f, 1.0f ) )
+                      .intensity( 0.80f ).position( vec3( 0.0f, 0.0f, 0.0f ) )
+                      .radius( 8.1f ).volume( 85.0f ) );
     for ( size_t i = 0; i < 8; ++i ) {
-        const float t = ( (float)i / 8.0f ) * 0.2f;
-        mLights.push_back( Light().colorDiffuse( ColorAf( 0.75f + t * 0.5f, 0.92f - t, 0.7f + t * t, 1.0f ) )
-                          .intensity( 0.6f ).radius( 7.05f ).volume( 55.0f ) );
+        const float t = ( (float)i / 8.0f ) * 0.3f;
+        mLights.push_back( Light().colorDiffuse( ColorAf( 0.70f + t * 0.5f, 0.2f - t, 0.1f + t * t, 1.0f ) )
+                          .intensity( 0.75f ).radius( 7.05f ).volume( 65.0f ) );
     }
 
     // Color texture format
