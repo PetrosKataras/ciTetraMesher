@@ -4,6 +4,7 @@
  */
 
 #include "CGALTetrahedralize.h"
+#define BOOST_PARAMETER_MAX_ARITY 12
 #ifdef _WIN32
 #include <windows.h>
 #endif

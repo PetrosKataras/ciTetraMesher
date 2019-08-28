@@ -1,8 +1,7 @@
 if( NOT TARGET ciTetraMesher )
 	get_filename_component( ciTetraMesher_PATH "${CMAKE_CURRENT_LIST_DIR}/../.." ABSOLUTE )
-	get_filename_component( ciTetraMesher_SOURCE_PATH "${CMAKE_CURRENT_LIST_DIR}/../../src" ABSOLUTE )
-	get_filename_component( ciTetraMesher_INCLUDE_PATH "${CMAKE_CURRENT_LIST_DIR}/../../include" ABSOLUTE )
-	get_filename_component( CINDER_PATH "${CMAKE_CURRENT_LIST_DIR}/../../../.." ABSOLUTE )
+	get_filename_component( ciTetraMesher_SOURCE_PATH "${ciTetraMesher_PATH}/src" ABSOLUTE )
+	get_filename_component( ciTetraMesher_INCLUDE_PATH "${ciTetraMesher_PATH}/include" ABSOLUTE )
 	
 	add_library( ciTetraMesher 
 
@@ -59,5 +58,11 @@ if( NOT TARGET ciTetraMesher )
 													 "${ciTetraMesher_INCLUDE_PATH}"
 	)
 	target_include_directories( ciTetraMesher BEFORE PUBLIC "${CINDER_PATH}/include" )
-	target_link_libraries( ciTetraMesher PUBLIC CGAL CGAL_Core boost_thread gmp mpfr )
+	find_package( CGAL REQUIRED COMPONENTS Core )
+	if( CGAL_FOUND )
+		target_link_libraries( ciTetraMesher PUBLIC CGAL::CGAL CGAL::CGAL_Core )
+	else()
+		message( FATAL_ERROR, "This program requires CGAL but no installed version was found! Aborting..." )
+	endif()
+
 endif()
